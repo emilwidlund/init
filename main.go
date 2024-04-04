@@ -11,25 +11,25 @@ import (
 )
 
 func main() {
-	moduleName := os.Args[1]
-	moduleArgs := os.Args[2:]
+	commandName := os.Args[1]
+	commandArgs := os.Args[2:]
 
-	if moduleName == "" {
-		fmt.Println("Provide a module to initialize")
+	if commandName == "" {
+		fmt.Println("Provide a command to initialize")
 		os.Exit(1)
 	}
 
-	script := resolveModule(moduleName, moduleArgs)
+	script := resolveCommand(commandName, commandArgs)
 
-	runModule(script)
+	runCommand(script)
 
 	// manifest := manifest.LoadManifest(".initrc")
 
 	os.Exit(0)
 }
 
-func resolveModule(moduleName string, moduleArgs []string) string {
-	modules := map[string]string{
+func resolveCommand(commandName string, commandArgs []string) string {
+	commands := map[string]string{
 		"file": "touch",
 		"dir":  "mkdir",
 		"git":  "git init",
@@ -41,7 +41,6 @@ func resolveModule(moduleName string, moduleArgs []string) string {
 		"pledge":      open("https://polar.sh/new"),
 		"tweet":       open("https://twitter.com/intent/post"),
 		"domain":      open("https://vercel.com/domains"),
-		"vercel":      open("https://vercel.com/new"),
 		"repl":        open("https://repl.it/new"),
 		"codepen":     open("https://codepen.io/pen"),
 		"codesandbox": open("https://codesandbox.io/new"),
@@ -49,19 +48,25 @@ func resolveModule(moduleName string, moduleArgs []string) string {
 		"shader":      open("https://www.shadertoy.com/new"),
 	}
 
-	moduleScript, ok := modules[moduleName]
+	commandScript, ok := commands[commandName]
 
 	if !ok {
-		fmt.Printf("Module %s not found\n", moduleName)
+		fmt.Printf("Command %s not found\n", commandName)
+
+		fmt.Println("Available commands:")
+		for key := range commands {
+			fmt.Println("- ", key)
+		}
+
 		os.Exit(1)
 	}
 
-	module := strings.Join(append([]string{moduleScript}, moduleArgs...), " ")
+	command := strings.Join(append([]string{commandScript}, commandArgs...), " ")
 
-	return module
+	return command
 }
 
-func runModule(script string) {
+func runCommand(script string) {
 	currentPath, wdErr := os.Getwd()
 	utils.Check(wdErr)
 
